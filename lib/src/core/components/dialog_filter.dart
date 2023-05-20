@@ -49,8 +49,9 @@ class _DialogFilterState extends State<DialogFilter> {
                     ),
                     groupValue: widget.value,
                     onChanged: (value) {
-                      widget.onPressed(value);
                       Navigator.of(context).pop();
+                      widget.onPressed(value);
+                      
                     },
                   ),
                   RadioListTile<Filter>(
@@ -64,8 +65,8 @@ class _DialogFilterState extends State<DialogFilter> {
                     ),
                     groupValue: widget.value,
                     onChanged: (value) {
-                      widget.onPressed(value);
                       Navigator.of(context).pop();
+                      widget.onPressed(value);
                     },
                   ),
                 ],

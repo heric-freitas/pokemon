@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dialog_filter.dart';
+
 import '../styles/app_color.dart';
+import 'dialog_filter.dart';
 
 class FilterPokemon extends StatelessWidget {
   final Filter? filterByNumber;

@@ -1,11 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
 import '../styles/app_color.dart';
 import '../styles/app_text_styles.dart';
 
 class CardPokemon extends StatelessWidget {
   final String name;
   final int index;
-  const CardPokemon({Key? key, required this.name, required this.index}) : super(key: key);
+  final String image;
+  const CardPokemon({Key? key, required this.name, required this.index, required this.image}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +45,9 @@ class CardPokemon extends StatelessWidget {
             ),
             Align(
               alignment: Alignment.center,
-              child: Image.asset('assets/icons/pokeball.png'),
+              child: CachedNetworkImage(
+                imageUrl: image,
+              )
             ),
             Align(
               alignment: Alignment.bottomCenter,

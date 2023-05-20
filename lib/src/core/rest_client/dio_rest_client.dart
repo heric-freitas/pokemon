@@ -12,7 +12,7 @@ class DioRestClient implements RestClient {
     baseUrl: Env.instance.get('base_url'),
   );
 
-  DioRestClient(this._dio) {
+  DioRestClient() {
     _dio = Dio(_defaultOptions);
   }
 
