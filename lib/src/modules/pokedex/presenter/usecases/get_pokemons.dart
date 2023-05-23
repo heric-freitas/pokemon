@@ -1,5 +1,5 @@
-import '../../models/pokemon_models.dart';
+import '../../models/list_pokemons_models.dart';
 
 abstract interface class GetPokemons {
-  Future<List<String>> call(int limit, int offset);
+  Future<ListPokemonsModels> call(String? next);
 }

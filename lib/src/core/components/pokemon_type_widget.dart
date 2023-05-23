@@ -11,6 +11,7 @@ class PokemonTypeWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return FittedBox(
       child: Container(
+        margin:  const EdgeInsets.symmetric(horizontal: 8),
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         decoration: BoxDecoration(

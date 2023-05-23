@@ -1,12 +1,14 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-class PokemonModels {
+import 'package:equatable/equatable.dart';
+
+class PokemonModels extends Equatable {
   final String name;
   final int index;
   final String image;
 
-  PokemonModels({
+  const PokemonModels({
     required this.name,
     required this.index,
     required this.image,
@@ -26,8 +28,8 @@ class PokemonModels {
   factory PokemonModels.fromMap(Map<String, dynamic> map) {
     return PokemonModels(
       name: map['name'] as String,
-      index: map['order'] as int,
-      image: map['sprites']['front_default'] as String,
+      index: map['index'] as int,
+      image: map['image'] as String,
     );
   }
 
@@ -38,7 +40,6 @@ class PokemonModels {
 
   PokemonModels copyWith({
     String? name,
-    String? url,
     int? index,
     String? image,
   }) {
@@ -48,4 +49,10 @@ class PokemonModels {
       image: image ?? this.image,
     );
   }
+  
+  @override
+  List<Object> get props => [name, index, image];
+
+  @override
+  bool get stringify => true;
 }

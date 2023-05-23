@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pokemon/src/modules/pokedex/domain/usecases/search_pokemon_impl.dart';
 import 'package:pokemon/src/modules/pokedex/presenter/usecases/get_image.dart';
-import 'domain/usecases/get_image.dart';
+import 'package:pokemon/src/modules/pokedex/presenter/usecases/search_pokemon.dart';
+import 'domain/usecases/get_image_impl.dart';
 import 'presenter/controllers/bloc/pokedex_bloc.dart';
 import 'ui/pokedex_page.dart';
 import 'package:provider/provider.dart';
@@ -40,8 +42,14 @@ class PokedexModule extends StatelessWidget {
             context.read(),
           ),
         ),
+        RepositoryProvider<SearchPokemon>(
+          create: (context) => SearchPokemonImpl(
+            context.read(),
+          ),
+        ),
         BlocProvider(
           create: (context) => PokedexBloc(
+            context.read(),
             context.read(),
             context.read(),
           ),

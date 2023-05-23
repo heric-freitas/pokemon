@@ -1,4 +1,5 @@
 import '../../domain/infra/pokedex_repository.dart';
+import '../../models/list_pokemons_models.dart';
 import '../../models/pokemon_models.dart';
 
 import '../datasources/pokedex_datasourece.dart';
@@ -9,11 +10,10 @@ class PokedexRepositoryImpl implements PokedexRepository {
   PokedexRepositoryImpl(this._pokedexDatasource);
 
   @override
-  Future<List<String>> getPokemons(int limit, int offset) async {
+  Future<ListPokemonsModels> getPokemons(String? next) async {
     try {
-      final result = await _pokedexDatasource.getPokemons(limit, offset);
-      final list = result.data['results'] as List;
-      return list.map((e) => e['url'] as String).toList();
+      final result = await _pokedexDatasource.getPokemons(next);
+      return ListPokemonsModels.fromMap(result.data);
     } on Exception catch (e) {
       throw Exception(e);
     }
@@ -23,6 +23,16 @@ class PokedexRepositoryImpl implements PokedexRepository {
   Future<PokemonModels> getImage(String url) async {
     try {
       final result = await _pokedexDatasource.getImage(url);
+      return PokemonModels.fromMap(result.data);
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  
+  @override
+  Future<PokemonModels> search(String search) async {
+    try {
+      final result = await _pokedexDatasource.search(search);
       return PokemonModels.fromMap(result.data);
     } catch (e) {
       throw Exception(e);

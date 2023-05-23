@@ -9,9 +9,9 @@ class PokedexDatasourceImpl implements PokedexDatasource {
   PokedexDatasourceImpl(this._dioRestClient);
 
   @override
-  Future<RestClientResponse> getPokemons(int limit, int offset) async {
+  Future<RestClientResponse> getPokemons(String? next) async {
     try {
-      return await _dioRestClient.get('/pokemon?limit=$limit&offset=$offset');
+      return await _dioRestClient.get(next ?? '/pokemon?limit=25&offset=0');
     } catch (e) {
       throw Exception(e);
     }
@@ -21,6 +21,15 @@ class PokedexDatasourceImpl implements PokedexDatasource {
   Future<RestClientResponse> getImage(String url) async {
     try {
       return await _dioRestClient.get(url);
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  
+  @override
+  Future<RestClientResponse> search(String search) async {
+    try {
+      return await _dioRestClient.get('pokemon/$search');
     } catch (e) {
       throw Exception(e);
     }

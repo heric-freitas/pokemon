@@ -4,7 +4,8 @@ import '../styles/app_color.dart';
 import '../styles/app_text_styles.dart';
 
 class SearchWidget extends StatefulWidget {
-  const SearchWidget({Key? key}) : super(key: key);
+  final ValueChanged<String> searchChange;
+  const SearchWidget({Key? key, required this.searchChange}) : super(key: key);
 
   @override
   State<SearchWidget> createState() => _SearchWidgetState();
@@ -28,6 +29,7 @@ class _SearchWidgetState extends State<SearchWidget> {
               showClose = false;
             });
           }
+          widget.searchChange(value);
         },
         decoration: InputDecoration(
           fillColor: context.appColor.white,

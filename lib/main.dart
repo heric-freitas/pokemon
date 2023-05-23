@@ -7,5 +7,5 @@ import 'src/pokemon_app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Env.instance.load();
-  return runApp(PokemonApp());
+  return runApp(const PokemonApp());
 }

@@ -7,8 +7,8 @@ class DioRestClient implements RestClient {
   late final Dio _dio;
 
   final _defaultOptions = BaseOptions(
-    connectTimeout: const Duration(seconds: 6),
-    receiveTimeout: const Duration(seconds: 60),
+    connectTimeout: const Duration(seconds: 120),
+    receiveTimeout: const Duration(seconds: 120),
     baseUrl: Env.instance.get('base_url'),
   );
 

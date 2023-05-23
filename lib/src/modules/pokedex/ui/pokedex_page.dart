@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pokemon/src/core/extensions/navigator.dart';
 import '../../../core/extensions/size.dart';
+import '../../../core/helper/debouncer.dart';
 import '../../../core/mixins/loader.dart';
 import '../../../core/mixins/messages.dart';
 
@@ -10,7 +12,6 @@ import '../../../core/components/dialog_filter.dart';
 import '../../../core/components/filter_pokemon.dart';
 import '../../../core/components/search_widget.dart';
 import '../../../core/styles/app_color.dart';
-import '../models/pokemon_models.dart';
 import '../presenter/controllers/bloc/pokedex_bloc.dart';
 
 class PokedexPage extends StatefulWidget {
@@ -22,6 +23,7 @@ class PokedexPage extends StatefulWidget {
 
 class _PokedexPageState extends State<PokedexPage> with Loader, Messages {
   late final PokedexBloc controller;
+  final debouncer = Debouncer(500);
 
   @override
   void initState() {
@@ -32,11 +34,6 @@ class _PokedexPageState extends State<PokedexPage> with Loader, Messages {
     });
   }
 
-  @override
-  void dispose() {
-    controller.close();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +47,19 @@ class _PokedexPageState extends State<PokedexPage> with Loader, Messages {
                 padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
                 child: Row(
                   children: [
-                    const Flexible(
+                    Flexible(
                       flex: 3,
-                      child: SearchWidget(),
+                      child: SearchWidget(
+                        searchChange: (value) {
+                          debouncer.call(() {
+                            if (value.isEmpty) {
+                              controller.add(GetPokemonsEvent());
+                            } else {
+                              controller.add(SearchEvent(value));
+                            }
+                          });
+                        },
+                      ),
                     ),
                     const SizedBox(
                       width: 16,
@@ -87,28 +94,36 @@ class _PokedexPageState extends State<PokedexPage> with Loader, Messages {
                     borderRadius: BorderRadius.circular(8)),
                 child: BlocConsumer<PokedexBloc, PokedexState>(
                   listener: (context, state) {
-                    switch (state) {
-                      case PokedexFilted():
-                        hideLoader();
-                      case PokedexInitial():
-                      case PokedexLoading():
+                    switch (state.status) {
+                      case PokedexStatus.loading:
                         showLoader();
-                      case PokedexLoad():
+                      case PokedexStatus.successSearch:
+                      case PokedexStatus.loadingSearch:
+                      case PokedexStatus.failure:
+                        hideLoader();
+                      case PokedexStatus.initial:
+                      case PokedexStatus.filted:
+                      case PokedexStatus.loadingMorePokemon:
+                        hideLoader();
+                      case PokedexStatus.success:
                         controller
                             .add(FilterListEvent(controller.state.filter));
-
-                      case PokedexFailure():
-                        hideLoader();
                     }
                   },
-                  builder: (context, state) => switch (state) {
-                    PokedexInitial() => SizedBox(width: context.screenWidth),
-                    PokedexLoading() => SizedBox(width: context.screenWidth),
-                    PokedexFilted(:final list) =>
-                      _SuccessPage(list: list, controller: controller),
-                    PokedexLoad() => SizedBox(width: context.screenWidth),
-                    PokedexFailure(:final message) =>
-                      _FailurePage(message: message),
+                  builder: (context, state) => switch (state.status) {
+                    PokedexStatus.success =>
+                      SizedBox(width: context.screenWidth),
+                    PokedexStatus.failure => _FailurePage(message: 'DEU RUIM'),
+                    PokedexStatus.loading =>
+                      SizedBox(width: context.screenWidth),
+                    PokedexStatus.initial =>
+                      SizedBox(width: context.screenWidth),
+                    PokedexStatus.successSearch =>
+                      _FiltedPage(controller: controller),
+                    PokedexStatus.loadingSearch ||
+                    PokedexStatus.filted ||
+                    PokedexStatus.loadingMorePokemon =>
+                      _SuccessPage(controller: controller),
                   },
                 )),
           )
@@ -118,30 +133,63 @@ class _PokedexPageState extends State<PokedexPage> with Loader, Messages {
   }
 }
 
-class _SuccessPage extends StatefulWidget {
-  final List<PokemonModels> list;
+class _FiltedPage extends StatefulWidget {
   final PokedexBloc controller;
-  _SuccessPage({Key? key, required this.list, required this.controller})
-      : super(key: key);
+  const _FiltedPage({super.key, required this.controller});
+
+  @override
+  State<_FiltedPage> createState() => __FiltedPageState();
+}
+
+class __FiltedPageState extends State<_FiltedPage> {
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      itemCount: widget.controller.state.list.length,
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        mainAxisExtent: 104,
+        mainAxisSpacing: 20,
+        maxCrossAxisExtent: 108,
+        crossAxisSpacing: 10,
+      ),
+      itemBuilder: (context, index) {
+        final pokemon = widget.controller.state.list[index];
+
+        return CardPokemon(
+          onPressed: () => context.pushNamedDetails(pokemon.name),
+          index: pokemon.index,
+          name: pokemon.name,
+          image: pokemon.image,
+        );
+      },
+    );
+  }
+}
+
+class _SuccessPage extends StatefulWidget {
+  final PokedexBloc controller;
+  const _SuccessPage({Key? key, required this.controller}) : super(key: key);
 
   @override
   State<_SuccessPage> createState() => _SuccessPageState();
 }
 
 class _SuccessPageState extends State<_SuccessPage> {
-  late final _scrollController;
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _scrollController = new ScrollController(initialScrollOffset: 5.0)
-      ..addListener(_scrollListener);
+    _scrollController.addListener(_scrollListener);
   }
 
   _scrollListener() {
+    final state = widget.controller.state;
     if (_scrollController.offset >=
             _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange) {
+        !_scrollController.position.outOfRange &&
+        !(state == PokedexStatus.loadingSearch) &&
+        !(state == PokedexStatus.loadingMorePokemon)) {
       widget.controller.add(GetMorePokemonsEvent());
     }
   }
@@ -150,7 +198,9 @@ class _SuccessPageState extends State<_SuccessPage> {
   Widget build(BuildContext context) {
     return GridView.builder(
       controller: _scrollController,
-      itemCount: widget.list.length,
+      itemCount: widget.controller.state == PokedexStatus.successSearch
+          ? widget.controller.state.list.length - 1
+          : widget.controller.state.list.length,
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
         mainAxisExtent: 104,
         mainAxisSpacing: 20,
@@ -158,9 +208,13 @@ class _SuccessPageState extends State<_SuccessPage> {
         crossAxisSpacing: 10,
       ),
       itemBuilder: (context, index) {
-        final pokemon = widget.list[index];
+        final pokemon = widget.controller.state.list[index];
+        if (index >= widget.controller.state.list.length) {
+          return const FittedBox(child: CircularProgressIndicator());
+        }
 
         return CardPokemon(
+          onPressed: () => context.pushNamedDetails(pokemon.name),
           index: pokemon.index,
           name: pokemon.name,
           image: pokemon.image,

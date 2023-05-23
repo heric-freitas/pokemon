@@ -10,7 +10,7 @@ mixin Loader<T extends StatefulWidget> on State<T> {
         barrierDismissible: false,
         context: context,
         builder: (context) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       );
     }

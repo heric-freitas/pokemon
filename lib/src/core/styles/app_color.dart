@@ -49,7 +49,7 @@ class ColorType {
     'bug' : const Color(0xFFA7B723),
     'dark' : const Color(0xFF75574C),
     'dragon' : const Color(0xFF7037FF),
-    'eletrick' : const Color(0xFFF9CF30),
+    'electric' : const Color(0xFFF9CF30),
     'fairy' : const Color(0xFFE69EAC),
     'fighting' : const Color(0xFFC12239),
     'fire' : const Color(0xFFF57D31),

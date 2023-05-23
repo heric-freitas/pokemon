@@ -1,14 +1,23 @@
 part of 'pokedex_bloc.dart';
 
-@immutable
-abstract class PokedexEvent {}
+sealed class PokedexEvent extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 
-class GetPokemonsEvent extends PokedexEvent {}
+final class GetPokemonsEvent extends PokedexEvent {}
 
-class GetMorePokemonsEvent extends PokedexEvent {}
+final class GetMorePokemonsEvent extends PokedexEvent {
+}
 
-class FilterListEvent extends PokedexEvent {
+final class FilterListEvent extends PokedexEvent {
   final Filter? filter;
 
   FilterListEvent(this.filter);
+}
+
+final class SearchEvent extends PokedexEvent {
+  final String search;
+
+  SearchEvent(this.search);
 }
