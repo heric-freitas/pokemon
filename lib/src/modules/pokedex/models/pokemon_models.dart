@@ -20,7 +20,7 @@ class PokemonModels extends Equatable {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      'index': index,
+      'order': index,
       'image': image,
     };
   }
@@ -28,8 +28,8 @@ class PokemonModels extends Equatable {
   factory PokemonModels.fromMap(Map<String, dynamic> map) {
     return PokemonModels(
       name: map['name'] as String,
-      index: map['index'] as int,
-      image: map['image'] as String,
+      index: map['order'] as int,
+      image: map['sprites']['front_default'] as String,
     );
   }
 
